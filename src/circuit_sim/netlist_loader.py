@@ -16,9 +16,13 @@ set termianl parameter to any number"""
                self.netlist = string
         elif filename:
             with open(file=filename, mode='r') as f:
-                 pass
+                while 1:
+                    _temp = f.readline()
+                    if _temp == "":
+                        break
+                    self.netlist.append(_temp)
+
         elif terminal is not None:
-             self.netlist = list()
              while 1:
                   _temp = input("Write element's information:\t")
 
