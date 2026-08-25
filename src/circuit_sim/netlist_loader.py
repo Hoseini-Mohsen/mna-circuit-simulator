@@ -9,7 +9,7 @@ set termianl parameter to any number"""
     def __init__(self, string : str | None = None, filename = None , terminal : int | None = None):
         self.netlist = list()
         self.nodes = list()
-        self.elements = dict()
+        self.elements = list()
 
         if string:
                string = string.split("\n")
@@ -33,18 +33,21 @@ set termianl parameter to any number"""
         else:
              raise SyntaxError("Invalid input. Please write valid input")
 
+        self.add_element()
+        self.add_node()
+
     def add_element(self):
         for i in self.netlist:
             if i[0] == 'R':
                 _info = i.split(' ')
-                self.elements.update({_info[0] : Resistor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]))})
+                self.elements.update({Resistor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]))})
 
             elif i[0] == 'I' or i[0] == 'V':
                 _info = i.split(' ')
 
                 match _info[3][0]:
                     case 'D':
-                        self.elements.update({_info[0] : CurrentSource(_info[0], int(_info[1]), int(_info[2]), int(_info[4])) if i[0] == 'I' else VoltageSource(_info[0], int(_info[1]), int(_info[2]), int(_info[4]))})
+                        self.elements.update({CurrentSource(_info[0], int(_info[1]), int(_info[2]), int(_info[4])) if i[0] == 'I' else VoltageSource(_info[0], int(_info[1]), int(_info[2]), int(_info[4]))})
 
                     case 'A':
                         pass
@@ -56,10 +59,10 @@ set termianl parameter to any number"""
                 _info = i.split(' ')
 
                 if len(_info) == 4:
-                    self.elements.update({_info[0] : Capacitor(_info[0], int(_info[1]), int(_info[2]), int(_info[3])) if i[0] == 'I' else Inductor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]))})
+                    self.elements.update({Capacitor(_info[0], int(_info[1]), int(_info[2]), int(_info[3])) if i[0] == 'C' else Inductor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]))})
 
                 else:
-                    self.elements.update({_info[0] : Capacitor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]), int(_info[4])) if i[0] == 'I' else Inductor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]), int(_info[4]))})
+                    self.elements.update({Capacitor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]), int(_info[4])) if i[0] == 'C' else Inductor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]), int(_info[4]))})
 
     def add_node(self):
         for i in self.netlist:
