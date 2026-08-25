@@ -1,4 +1,4 @@
-from base import Component
+from .base import Component
 
 
 class Resistor(Component):
