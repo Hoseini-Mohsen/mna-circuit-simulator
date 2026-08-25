@@ -11,7 +11,8 @@ class Circuit:
             _temp = NetlistLoader(filename=filename)
         elif terminal is not None:
             _temp = NetlistLoader(terminal=terminal)
-    
+        else:
+            raise SyntaxError("Invalid input. Please write valid input")
         self.nodes = _temp.nodes
         self.components = _temp.elements
 
