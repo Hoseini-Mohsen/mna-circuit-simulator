@@ -1,10 +1,18 @@
 from src.circuit_sim.components import VoltageSource, Inductor
-
+from src.circuit_sim.netlist_loader import NetlistLoader
 
 class Circuit:
-    def __init__(self, nodes, components):
-        self.nodes = nodes
-        self.components = components
+    def __init__(self,  string : str | None = None, filename = None , terminal : int | None = None):
+        _temp
+        if string:
+            _temp = NetlistLoader(string)
+        elif filename:
+            _temp = NetlistLoader(filename=filename)
+        elif terminal is not None:
+            _temp = NetlistLoader(terminal=terminal)
+    
+        self.nodes = _temp.nodes
+        self.components = _temp.elements
 
     def assign_indices(self):
         """assign indices to nodes and components for matrix construction."""
