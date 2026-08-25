@@ -37,13 +37,14 @@ class Resistor(Component):
 class Capacitor(Component):
     """Capacitor is a passive component that stores electrical energy in an electric field."""
 
-    def __init__(self, component_id: str, node1, node2, capacitance: int | float):
+    def __init__(self, component_id: str, node1, node2, capacitance: int | float, initial_condition : int | float | None = None):
         if not isinstance(capacitance, (int, float)):
             raise TypeError("Capacitance must be a numeric value.")
 
         super().__init__(component_id, node1, node2)
 
         self.capacitance = capacitance
+        self.initial_condition = initial_condition
 
     def stamp(self, G_matrix, I_vector):
         """Stamp the capacitor into the G_matrix and I_vector."""
@@ -61,7 +62,7 @@ class Inductor(Component):
     """Inductor is a passive component that stores energy in a magnetic field
     when electric current flows through it."""
 
-    def __init__(self, component_id: str, node1, node2, inductance: int | float):
+    def __init__(self, component_id: str, node1, node2, inductance: int | float, initial_condition : int | float | None = None):
         if not isinstance(inductance, (int, float)):
             raise TypeError("Inductance must be a numeric value.")
 
@@ -69,6 +70,7 @@ class Inductor(Component):
 
         self.inductance = inductance
         self.branch_index = None  # Will be assigned during index assignment
+        self.initial_condition = initial_condition
 
     def stamp(self, G_matrix, I_vector):
         """Stamp the inductor into the G_matrix and I_vector."""
