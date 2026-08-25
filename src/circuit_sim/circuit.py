@@ -4,7 +4,7 @@ from src.circuit_sim.solver import solve_circuit
 
 class Circuit:
     def __init__(self,  string : str | None = None, filename = None , terminal : int | None = None):
-        _temp
+        _temp = None
         if string:
             _temp = NetlistLoader(string)
         elif filename:
@@ -24,7 +24,6 @@ class Circuit:
             if node.number != 0: #Node not ground
                 node.index = index
                 index += 1
-
         for component in self.components:
             if isinstance(component, (VoltageSource, Inductor)):
                 component.branch_index = index
@@ -39,20 +38,20 @@ class Circuit:
 
         # Initialize G_matrix and I_vector
         G_matrix = [[0.0 for _ in range(num_unknowns)] for _ in range(num_unknowns)]
-        I_vector = [0.0 for _ in range(num_unknowns)]
+        I_vector = [[0.0] for _ in range(num_unknowns)]
 
         return G_matrix, I_vector
 
     def build_system(self):
         """build the system of equations for the circuit based on the components and nodes."""
 
-        self.assign_indices()
         G_matrix, I_vector = self.build_matrices()
 
         for component in self.components:
             component.stamp(G_matrix, I_vector)
 
-        return G_matrix, I_vector
+        self.G_matrix = G_matrix
+        self.I_vector = I_vector
 
     def thevenin_norton(self, node1, node2):
         index = [0, 0]
