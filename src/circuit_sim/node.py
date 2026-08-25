@@ -31,6 +31,8 @@ class Node:
 
         self._voltage = voltage
 
+    def __str__(self):
+        return self.number
     def __repr__(self):
         return f"Node(number={self.number}, voltage={self._voltage})"
 
