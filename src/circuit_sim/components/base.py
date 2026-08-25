@@ -16,3 +16,6 @@ class Component(ABC):
     @abstractmethod
     def stamp(self, G_matrix, I_vector):
         pass
+
+    def __str__(self):
+        return self.id
