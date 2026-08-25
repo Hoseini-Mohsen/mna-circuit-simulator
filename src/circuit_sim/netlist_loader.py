@@ -3,7 +3,7 @@ from src.circuit_sim.node import Node
 
 class NetlistLoader:
     """The default input is string which passed to Circuit class. For giving netlest as file
-, write the file's name and its destination such as "C:\Users\username\Desktop\file.txt, For giving netlist in terminal,
+, write the file's name and its destination such as "C:\\Users\\username\\Desktop\\file.txt, For giving netlist in terminal,
 set termianl parameter to any number"""
 
     def __init__(self, string : str | None = None, filename = None , terminal : int | None = None):
@@ -32,22 +32,41 @@ set termianl parameter to any number"""
                   self.netlist.append(_temp)
         else:
              raise SyntaxError("Invalid input. Please write valid input")
-
         self.add_element()
-        self.add_node()
 
     def add_element(self):
-        for i in self.netlist:
-            if i[0] == 'R':
-                _info = i.split(' ')
-                self.elements.update({Resistor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]))})
+        for item in self.netlist:
+            if item == "":
+                continue
 
-            elif i[0] == 'I' or i[0] == 'V':
-                _info = i.split(' ')
+            _info = item.split(' ')
+
+            node1, node2 = Node(int(_info[1])), Node(int(_info[2]))
+            if  not self.nodes:
+                self.nodes.extend([node1, node2])
+                
+            else:
+                flag = [False, False]
+                for i in self.nodes:
+                    if node1.number == i:
+                        node1 = i
+                        flag[0] = True
+                    if node2.number == i:
+                        node2 = i
+                        flag[1] = True
+                if flag[0] == False:
+                    self.nodes.append(node1)
+                if flag[1] == False:
+                    self.nodes.append(node2)
+
+            if item[0] == 'R':
+                self.elements.append(Resistor(_info[0], node1, node2, int(_info[3])))
+
+            elif item[0] == 'I' or item[0] == 'V':
 
                 match _info[3][0]:
                     case 'D':
-                        self.elements.update({CurrentSource(_info[0], int(_info[1]), int(_info[2]), int(_info[4])) if i[0] == 'I' else VoltageSource(_info[0], int(_info[1]), int(_info[2]), int(_info[4]))})
+                        self.elements.append(CurrentSource(_info[0], node1, node2, int(_info[4])) if item[0] == 'I' else VoltageSource(_info[0], node1, node2, int(_info[4])))
 
                     case 'A':
                         pass
@@ -55,19 +74,10 @@ set termianl parameter to any number"""
                     case 'S':
                         pass
 
-            elif i[0] == 'L' or i[0] == 'C':
-                _info = i.split(' ')
+            elif item[0] == 'L' or item[0] == 'C':
 
                 if len(_info) == 4:
-                    self.elements.update({Capacitor(_info[0], int(_info[1]), int(_info[2]), int(_info[3])) if i[0] == 'C' else Inductor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]))})
+                    self.elements.append(Capacitor(_info[0], node1, node2, int(_info[3])) if item[0] == 'C' else Inductor(_info[0], node1, node2, int(_info[3])))
 
                 else:
-                    self.elements.update({Capacitor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]), int(_info[4])) if i[0] == 'C' else Inductor(_info[0], int(_info[1]), int(_info[2]), int(_info[3]), int(_info[4]))})
-
-    def add_node(self):
-        for i in self.netlist:
-            i.split(' ')
-            if i[1] not in self.nodes:
-                self.nodes.append(Node(int(i[1])))
-            if i[2] not in self.nodes:
-                self.nodes.append(Node(int(i[2])))
+                    self.elements.append(Capacitor(_info[0], node1, node2, int(_info[3]), int(_info[4])) if item[0] == 'C' else Inductor(_info[0], node1, node2, int(_info[3]), int(_info[4])))
