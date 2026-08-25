@@ -1,4 +1,4 @@
-from base import Component
+from .base import Component
 
 
 class VoltageSource(Component):
@@ -26,7 +26,7 @@ class VoltageSource(Component):
         if b is not None:
             G_matrix[k][b] -= 1
             G_matrix[b][k] -= 1
-        I_vector[k] += v
+        I_vector[k][0] += v
 
     def __repr__(self):
         return (
@@ -53,9 +53,9 @@ class CurrentSource(Component):
         i = self.current
 
         if  a is not None:
-            I_vector[a] -= i
+            I_vector[a][0] -= i
         if b is not None:
-            I_vector[b] += i
+            I_vector[b][0] += i
 
     def __repr__(self):
         return (
