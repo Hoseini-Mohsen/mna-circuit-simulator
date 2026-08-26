@@ -18,29 +18,6 @@ class Circuit:
         self.nodes = _temp.nodes
         self.components = _temp.elements
 
-    def assign_indices(self):
-        """assign indices to nodes and components for matrix construction."""
-
-        index = 0
-        flag = False
-        for node in self.nodes:
-            if node.number == 0:
-                flag = True
-
-        if not flag:
-            self.nodes[0].number = 0
-
-        for node in self.nodes:
-            if node.number != 0: #Node not ground
-                node.index = index
-                index += 1
-        for component in self.components:
-            if isinstance(component, (VoltageSource, Inductor)):
-                component.branch_index = index
-                index += 1
-
-        return index
-
     def add_element(self, string):
         """Add element from string"""
         _temp = Netlist(string = string, nodes = self.nodes, elements = self.components)
@@ -69,8 +46,30 @@ class Circuit:
             raise ValueError("The G_matrix is singular. So the circuit has no uniqe solution. It might be because of voltage sources in parallell")
         
         return True
-                
 
+    def assign_indices(self):
+        """assign indices to nodes and components for matrix construction."""
+
+        index = 0
+        flag = False
+        for node in self.nodes:
+            if node.number == 0:
+                flag = True
+
+        if not flag:
+            self.nodes[0].number = 0
+
+        for node in self.nodes:
+            if node.number != 0: #Node not ground
+                node.index = index
+                index += 1
+        for component in self.components:
+            if isinstance(component, (VoltageSource, Inductor)):
+                component.branch_index = index
+                index += 1
+
+        return index
+            
 
     def build_matrices(self):
         """Build the G_matrix and I_vector based on the circuit components."""
@@ -95,44 +94,72 @@ class Circuit:
     
     def thevenin_norton(self, node1, node2):
         """Doing thevenin norton analyzing from node1 and node2"""
+        self.V_thevenin = None
+        self.I_norton = None
+        self.R_thevenin = None
+        counter = 0
         index = [0, 0]
         for node in self.nodes:
             if node1 == node:
-                index[0] = node.index
+                index[0] = node
             if node2 == node:
-                index[1] = node.index
+                index[1] = node
 
         try:
             G_matrix, I_vector = self.build_system()
-
+            print(G_matrix, I_vector)
             Y_matrix = solve_circuit(G_matrix, I_vector)
-
-            self.V_thevenin = Y_matrix[index[0]] - Y_matrix[index[1]]
+            print(Y_matrix)
+            if 0 not in [index[0].number, index[1].number]:
+                self.V_thevenin = Y_matrix[index[0].index][0] - Y_matrix[index[1].index][0]
+            else:
+                self.V_thevenin = Y_matrix[index[0].index][0] if index[0].number != 0 else Y_matrix[index[1].index][0]
+            counter += 1
         except:
-            pass
+            print("The voltage of open circuit is infinit, try to calculate information in other ways")
 
+        _temp_components = None
+        _temp_nodes = None
+        flag = False
         try:
-
             _temp_components = list(self.components)
-            V_test = VoltageSource("V_test", node1, node2, 0)
-            _temp_components.append(V_test)
+            _temp_nodes = list(self.nodes)
+            V_test = VoltageSource("V_test", index[0], index[1], 0)
+            self.components.append(V_test)
+            flag = True
             G_matrix, I_vector = self.build_system()
-
             Y_matrix = solve_circuit(G_matrix, I_vector)
-
-            self.I_norton = Y_matrix[V_test.branch_index]
+            self.I_norton = Y_matrix[V_test.branch_index][0]
+            self.components = _temp_components
+            self.nodes = _temp_nodes
+            counter += 1
         except:
-            pass
+            print("The current of short circuit is infinit, try to calculate information in other ways")
+            if flag == True:
+                self.components = _temp_components
+                self.nodes = _temp_nodes
 
-        try:
-            _temp_components = list(self.components)
-            V_test = CurrentSource("I_test", node1, node2, 1)
-            _temp_components.append(V_test)
-            G_matrix, I_vector = self.build_matrices
+        if counter == 2:
+            return None
+        flag = False
 
-            Y_matrix = solve_circuit(G_matrix, I_vector)
+        # TODO: In development, first must simplify netlist and kill funcs be created
+        # try:
+        #     _temp_components = list(self.components)
+        #     _temp_nodes = list(self.nodes)            
+        #     I_test = CurrentSource("I_test", node1, node2, 1)
+        #     self.components.append(I_test)
+        #     flag = True
+        #     G_matrix, I_vector = self.build_matrices
 
-            self.V_thevenin = Y_matrix[index[0]] - Y_matrix[index[1]]
-            # TODO completing
-        except:
-            pass
+        #     Y_matrix = solve_circuit(G_matrix, I_vector)
+
+        #     if 0 not in [index[0].number, index[1].number]:
+        #         self.R_thevenin = Y_matrix[index[0].index][0] - Y_matrix[index[1].index][0]
+        #     else:
+        #         self.R_thevenin = Y_matrix[index[0].index][0] if index[0].number != 0 else Y_matrix[index[1].index][0]        
+        # except:
+        #     print("An error accured while finding R thevenin")
+        #     if flag == True:
+        #         self.components = _temp_components
+        #         self.nodes = _temp_nodes
