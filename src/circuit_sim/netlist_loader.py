@@ -6,14 +6,19 @@ class Netlist:
 , write the file's name and its destination such as "C:\\Users\\username\\Desktop\\file.txt, For giving netlist in terminal,
 set termianl parameter to any number"""
 
-    def __init__(self, string : str | None = None, filename = None , terminal : int | None = None):
+    def __init__(self, string : str | None = None, filename : str | None = None, terminal : int | None = None, nodes : list | None = None, elements : list | None = None):
         self.netlist = list()
         self.nodes = list()
         self.elements = list()
+        if nodes and elements:
+            self.elements = elements
+            self.nodes = nodes
+            self.netlist = string
 
-        if string:
+        elif string:
                string = string.split("\n")
                self.netlist = string
+
         elif filename:
             with open(file=filename, mode='r') as f:
                 while 1:
@@ -30,6 +35,7 @@ set termianl parameter to any number"""
                        break
 
                   self.netlist.append(_temp)
+                  
         else:
              raise SyntaxError("Invalid input. Please write valid input")
         self.add_element()
