@@ -31,6 +31,12 @@ class Circuit:
 
         return index
 
+    def add_element(self, string):
+        """Add element from string"""
+        _temp = Netlist(string = string, nodes = self.nodes, elements = self.components)
+        self.components = _temp.elements
+        self.nodes = _temp.nodes
+
     def build_matrices(self):
         """Build the G_matrix and I_vector based on the circuit components."""
 
@@ -50,18 +56,19 @@ class Circuit:
         for component in self.components:
             component.stamp(G_matrix, I_vector)
 
-        self.G_matrix = G_matrix
-        self.I_vector = I_vector
-
+        return G_matrix, I_vector
+    
     def thevenin_norton(self, node1, node2):
+        """Doing thevenin norton analyzing from node1 and node2"""
         index = [0, 0]
         for node in self.nodes:
             if node1 == node:
                 index[0] = node.index
             if node2 == node:
                 index[1] = node.index
+
         try:
-            G_matrix, I_vector = self.build_matrices
+            G_matrix, I_vector = self.build_system()
 
             Y_matrix = solve_circuit(G_matrix, I_vector)
 
@@ -74,7 +81,7 @@ class Circuit:
             _temp_components = list(self.components)
             V_test = VoltageSource("V_test", node1, node2, 0)
             _temp_components.append(V_test)
-            G_matrix, I_vector = self.build_matrices
+            G_matrix, I_vector = self.build_system()
 
             Y_matrix = solve_circuit(G_matrix, I_vector)
 
@@ -91,6 +98,6 @@ class Circuit:
             Y_matrix = solve_circuit(G_matrix, I_vector)
 
             self.V_thevenin = Y_matrix[index[0]] - Y_matrix[index[1]]
-
+            # TODO completing
         except:
             pass
