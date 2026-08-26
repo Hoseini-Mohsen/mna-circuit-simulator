@@ -13,7 +13,7 @@ set termianl parameter to any number"""
         if nodes and elements:
             self.elements = elements
             self.nodes = nodes
-            self.netlist = string
+            self.netlist = [string]
 
         elif string:
                string = string.split("\n")
