@@ -1,6 +1,8 @@
 from src.circuit_sim.components import *
 from src.circuit_sim.netlist_loader import Netlist
 from src.circuit_sim.solver import solve_circuit
+import numpy
+import networkx as nx
 
 class Circuit:
     def __init__(self,  string : str | None = None, filename = None , terminal : int | None = None):
@@ -20,6 +22,14 @@ class Circuit:
         """assign indices to nodes and components for matrix construction."""
 
         index = 0
+        flag = False
+        for node in self.nodes:
+            if node.number == 0:
+                flag = True
+
+        if not flag:
+            self.nodes[0].number = 0
+
         for node in self.nodes:
             if node.number != 0: #Node not ground
                 node.index = index
@@ -36,6 +46,31 @@ class Circuit:
         _temp = Netlist(string = string, nodes = self.nodes, elements = self.components)
         self.components = _temp.elements
         self.nodes = _temp.nodes
+
+    def is_valid(self):
+        """Check the circuit to be valid and has uniqe solution"""
+        _graph = nx.MultiDiGraph()
+        for item in self.components:
+            if item.id[0] in ['R', 'V', 'L', 'C']:
+                _graph.add_edge(item.nodes[0].number, item.nodes[1].number, type = type(item), data = item.id)
+                _graph.add_edge(item.nodes[1].number, item.nodes[0].number, type = type(item), data = item.id)
+            elif item.id[0] == 'I':
+                _graph.add_edge(item.nodes[0].number, item.nodes[1].number, type = type(item), data = item.id)
+        for u, v, data in _graph.edges(data=True):
+            if data.get("type") == CurrentSource:
+                _temp = _graph.copy()
+                _temp.remove_edges_from([(u, v)])
+                _paths = nx.all_simple_paths(_temp, source=u, target=v)
+                if next(_paths, None) is None:
+                    raise ValueError("There is a current source which is series with other current sources or theer is a cutset")
+                
+        A, _ = self.build_system()
+        if numpy.linalg.matrix_rank(A) != len(A):
+            raise ValueError("The G_matrix is singular. So the circuit has no uniqe solution. It might be because of voltage sources in parallell")
+        
+        return True
+                
+
 
     def build_matrices(self):
         """Build the G_matrix and I_vector based on the circuit components."""
