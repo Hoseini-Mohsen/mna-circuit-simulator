@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from circuit_sim.node import Node
+from src.circuit_sim.node import Node
 
 
 class Component(ABC):
