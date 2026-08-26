@@ -1,7 +1,7 @@
 from src.circuit_sim.components import *
 from src.circuit_sim.node import Node
 
-class NetlistLoader:
+class Netlist:
     """The default input is string which passed to Circuit class. For giving netlest as file
 , write the file's name and its destination such as "C:\\Users\\username\\Desktop\\file.txt, For giving netlist in terminal,
 set termianl parameter to any number"""
