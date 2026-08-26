@@ -1,16 +1,16 @@
 from src.circuit_sim.components import *
-from src.circuit_sim.netlist_loader import NetlistLoader
+from src.circuit_sim.netlist_loader import Netlist
 from src.circuit_sim.solver import solve_circuit
 
 class Circuit:
     def __init__(self,  string : str | None = None, filename = None , terminal : int | None = None):
         _temp = None
         if string:
-            _temp = NetlistLoader(string)
+            _temp = Netlist(string)
         elif filename:
-            _temp = NetlistLoader(filename=filename)
+            _temp = Netlist(filename=filename)
         elif terminal is not None:
-            _temp = NetlistLoader(terminal=terminal)
+            _temp = Netlist(terminal=terminal)
         else:
             raise SyntaxError("Invalid input. Please write valid input")
         self.nodes = _temp.nodes
