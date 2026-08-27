@@ -47,6 +47,9 @@ class Circuit:
         
         return True
 
+    def kill(self, exceptions : list | None = None):
+        pass
+
     def assign_indices(self):
         """assign indices to nodes and components for matrix construction."""
 
@@ -107,9 +110,7 @@ class Circuit:
 
         try:
             G_matrix, I_vector = self.build_system()
-            print(G_matrix, I_vector)
             Y_matrix = solve_circuit(G_matrix, I_vector)
-            print(Y_matrix)
             if 0 not in [index[0].number, index[1].number]:
                 self.V_thevenin = Y_matrix[index[0].index][0] - Y_matrix[index[1].index][0]
             else:
@@ -163,3 +164,17 @@ class Circuit:
         #     if flag == True:
         #         self.components = _temp_components
         #         self.nodes = _temp_nodes
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            for node in self.nodes:
+                if key == node:
+                    return node.__repr__()
+            return "The specified node not found"
+            
+
+        elif isinstance(key, str):
+            for item in self.components:
+                if item.id == key:
+                    return item.__repr__()
+            return "The specified element not found"
