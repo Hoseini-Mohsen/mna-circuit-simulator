@@ -32,9 +32,16 @@ class Node:
         self._voltage = voltage
 
     def __str__(self):
-        return self.number
+        return f"Node {self.number}"
+        
     def __repr__(self):
         return f"Node(number={self.number}, voltage={self._voltage})"
 
     def __eq__(self, value):
-        return self.number == value
+        if isinstance(value, Node):
+            return value.number == self.number
+        elif isinstance(value, int):
+            return value == self.number
+        else:
+            raise NotImplemented
+
