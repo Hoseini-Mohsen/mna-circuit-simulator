@@ -35,7 +35,7 @@ set termianl parameter to any number"""
                        break
 
                   self.netlist.append(_temp)
-                  
+
         else:
              raise SyntaxError("Invalid input. Please write valid input")
         self.add_element()
@@ -44,7 +44,8 @@ set termianl parameter to any number"""
         for item in self.netlist:
             if item == "":
                 continue
-
+            
+            _temp_element = None
             _info = item.split(' ')
 
             node1, node2 = Node(int(_info[1])), Node(int(_info[2]))
@@ -66,24 +67,31 @@ set termianl parameter to any number"""
                     self.nodes.append(node2)
 
             if item[0] == 'R':
-                self.elements.append(Resistor(_info[0], node1, node2, int(_info[3])))
+                _temp_element = Resistor(_info[0], node1, node2, int(_info[3]))
+                self.elements.append(_temp_element)
 
             elif item[0] == 'I' or item[0] == 'V':
 
-                match _info[3][0]:
-                    case 'D':
-                        self.elements.append(CurrentSource(_info[0], node1, node2, int(_info[4])) if item[0] == 'I' else VoltageSource(_info[0], node1, node2, int(_info[4])))
+                match _info[3]:
+                    case 'DC':
+                        _temp_element = CurrentSource(_info[0], node1, node2, int(_info[4])) if item[0] == 'I' else VoltageSource(_info[0], node1, node2, int(_info[4]))            
+                        self.elements.append(_temp_element)
 
-                    case 'A':
+                    case 'AC':
                         pass
 
-                    case 'S':
+                    case 'TR':
                         pass
 
             elif item[0] == 'L' or item[0] == 'C':
 
                 if len(_info) == 4:
-                    self.elements.append(Capacitor(_info[0], node1, node2, int(_info[3])) if item[0] == 'C' else Inductor(_info[0], node1, node2, int(_info[3])))
+                    _temp_element = Capacitor(_info[0], node1, node2, int(_info[3])) if item[0] == 'C' else Inductor(_info[0], node1, node2, int(_info[3]))
+                    self.elements.append()
 
                 else:
-                    self.elements.append(Capacitor(_info[0], node1, node2, int(_info[3]), int(_info[4])) if item[0] == 'C' else Inductor(_info[0], node1, node2, int(_info[3]), int(_info[4])))
+                    _temp_element = Capacitor(_info[0], node1, node2, int(_info[3]), int(_info[4])) if item[0] == 'C' else Inductor(_info[0], node1, node2, int(_info[3]), int(_info[4]))
+                    self.elements.append(_temp_element)
+            
+            node1.add_element(_temp_element)
+            node2.add_element(_temp_element)
